@@ -104,6 +104,7 @@ server.workspace('DQMContent', 10, 'Trigger', 'L1T', '^(L1T|L1T2016)/', '',
 	         'L1T/Layouts/Stage2-QuickCollection/67 - uGMT Zero Suppression misMatch Ratio (All Events)',
 	         'L1T/Layouts/Stage2-QuickCollection/68 - uGMT Zero Suppression misMatch Ratio (Fat Events)',
 	         'L1T/Layouts/Stage2-QuickCollection/69 - uGT Input vs uGMT Output misMatch Ratio',
+	         'L1T/Layouts/Stage2-QuickCollection/70 - uGT Algoritm Trigger Bits (before prescale) vs Global BX Number',
                 )
 
 server.workspace('DQMContent', 11, 'Trigger', 'L1TEMU', '^(L1TEMU|L1T2016EMU)/', '',
@@ -166,7 +167,7 @@ server.workspace('DQMContent', 19, 'Tracker', 'PixelPhase1', '^PixelPhase1/', ''
                   'PixelPhase1/Layouts/000 - PixelPhase1 ReportSummary: Layer or Disk vs subdet',
                   #'PixelPhase1/Layouts/01a - PixelPhase1_Event_Rate',
                   'PixelPhase1/Layouts/00a - PixelPhase1 FED Occupancy vs Lumi Sections',
-                  'PixelPhase1/Layouts/00b - PixelPhase1_Error_Summary', 
+                  'PixelPhase1/Layouts/00b - PixelPhase1_Error_Summary',
                   'PixelPhase1/Layouts/01c - PixelPhase1 Cluster Size vs Cluster Eta',
                   'PixelPhase1/Layouts/02 - PixelPhase1_Digi_ADC_Barrel',
                   'PixelPhase1/Layouts/03 - PixelPhase1_Digi_ADC_Endcap',
@@ -184,7 +185,7 @@ server.workspace('DQMContent', 19, 'Tracker', 'PixelPhase1', '^PixelPhase1/', ''
                   'PixelPhase1/Layouts/33 - ntracks',
                   'PixelPhase1/Layouts/34 - Charge and size (on-track)',
                   'PixelPhase1/Layouts/35a - Cluster charge (on-track) per Inner Ladders',
-                  'PixelPhase1/Layouts/35b - Cluster charge (on-track) per Outer Ladders',  
+                  'PixelPhase1/Layouts/35b - Cluster charge (on-track) per Outer Ladders',
                   'PixelPhase1/Layouts/35c - Cluster charge (on-track) per Disk',
                   #'PixelPhase1/Layouts/35 - Cluster on track and vertices per lumi',
                   'PixelPhase1/Layouts/36 - Cluster position (on-track) per PXLayer',
@@ -212,15 +213,17 @@ server.workspace('DQMContent', 21, 'Tracker', 'SiStrip', '^(SiStrip|Tracking)/',
                  'SiStrip/Layouts/09 - Tracks (Cosmic Tracking)',
                  'SiStrip/Layouts/10 - Tracks (HI run)',
                  'SiStrip/Layouts/11a - FED Errors vs FED ID',
+                 'SiStrip/Layouts/33 - Cluster & Digi occupancy per FED',
+                 'SiStrip/Layouts/34 - FED Errors Vs Id Vs Lumi',
                 )
 
 # Calorimeter workspaces:
-server.workspace('DQMContent', 30, 'Calorimeters', 'Ecal', '(^Ecal(|Barrel|Endcap|Calibration)/|^L1T/L1TStage2CaloLayer1/ECalDetail/ecalOccRecdEtWgt|^L1T/L1TStage2CaloLayer1/ECalDetail/ecalOccSent|^L1T/L1TStage2CaloLayer1/ECalDetail/ecalOccSentAndRecd|^HLT/ObjectMonitor/MainShifter/di-Electron_Mass)', 'Ecal/Layouts',
+server.workspace('DQMContent', 30, 'Calorimeters', 'Ecal', '(^Ecal(|Barrel|Endcap|Calibration)/|^L1T/L1TStage2CaloLayer1/ECalDetail/ecalOccSent|^L1T/L1TStage2CaloLayer1/ECalDetail/ecalOccSentAndRecd|^HLT/ObjectMonitor/MainShifter/di-Electron_Mass|^L1T/L1TObjects/L1TEGamma/timing/Ratio_L1TEGamma_BX_0|^L1T/L1TObjects/L1TEGamma/timing/Ratio_L1TEGamma_BX_minus1|^L1T/L1TObjects/L1TEGamma/timing/First_bunch/ptmin_20p0_gev/egamma_noniso_bx_ieta_firstbunch_ptmin20p0|^L1T/L1TObjects/L1TEGamma/timing/Last_bunch/ptmin_20p0_gev/egamma_noniso_bx_ieta_lastbunch_ptmin20p0)', 'Ecal/Layouts',
                  'Ecal/Layouts/00 Summary',
                  'Ecal/Layouts/01 Occupancy Summary',
                  'Ecal/Layouts/02 Calibration Summary',
                 )
-                # Ecal workspace modified above to include three L1 Trigger
+                # Ecal workspace modified above to include six L1 Trigger
                 # plots and one HLT plot as requested by Ecal team
 
 server.workspace('DQMContent', 31, 'Calorimeters', 'EcalPreshower', '^EcalPreshower/', '',
@@ -229,6 +232,7 @@ server.workspace('DQMContent', 31, 'Calorimeters', 'EcalPreshower', '^EcalPresho
                  'EcalPreshower/Layouts/03-GoodRechitEnergySummary-EcalPreshower',
                  'EcalPreshower/Layouts/04-ESTimingTaskSummary-EcalPreshower',
                  'EcalPreshower/Layouts/05-ESGain-EcalPreshower',
+                 'EcalPreshower/Layouts/06-ES-Fiber-Error-Code',
                 )
 
 server.workspace('DQMContent', 32, 'Calorimeters', 'HCAL', '^(Hcal|Hcal2)/', '',
@@ -342,3 +346,4 @@ server.workspace('DQMContent', 43, 'Muons', 'GEM', '^GEM/', '',
 server.workspace('DQMContent', 50, 'CTPPS', 'TrackingStrip', '^CTPPS/(TrackingStrip|common)/', 'CTPPS/TrackingStrip/Layouts')
 server.workspace('DQMContent', 51, 'CTPPS', 'TrackingPixel', '^CTPPS/(TrackingPixel|common)/', 'CTPPS/TrackingPixel/Layouts')
 server.workspace('DQMContent', 52, 'CTPPS', 'TimingDiamond', '^CTPPS/(TimingDiamond|common)/', 'CTPPS/TimingDiamond/Layouts')
+server.workspace('DQMContent', 53, 'CTPPS', 'TimingFastSilicon', '^CTPPS/(TimingFastSilicon|common)/', 'CTPPS/TimingFastSilicon/Layouts')

@@ -4,6 +4,7 @@
 
 def CTPPSTrackingStripLayoutRP(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/RP summary/" + p] = DQMItem(layout=rows)
 def CTPPSTrackingStripLayoutDiag(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/diagonal summary/" + p] = DQMItem(layout=rows)
+def CTPPSTrackingStripLayoutAntiDiag(i, p, *rows): i["CTPPS/TrackingStrip/Layouts/antidiagonal summary/" + p] = DQMItem(layout=rows)
 
 strip_rows = [ "tp", "bt" ]
 strip_cols = [ "sector 45/station 220/fr", "sector 45/station 210/fr", "sector 56/station 210/fr", "sector 56/station 220/fr" ]
@@ -31,7 +32,7 @@ for plot in [ "active planes", "recognized patterns", "planes contributing to fi
   CTPPSTrackingStripLayoutRP(dqmitems, plot + " UV", *rows)
 
 # layouts with overlays
-for suffix in [ "", " (short)" ]:
+for suffix in [ "" ]:
   rows = list()
   for rp in strip_rows:
     row = list()
@@ -43,6 +44,7 @@ for suffix in [ "", " (short)" ]:
   CTPPSTrackingStripLayoutRP(dqmitems, "activity per BX" + suffix, *rows)
 
 strip_diagonals = [ "diagonal 45bot - 56top", "diagonal 45top - 56bot" ]
+strip_antidiagonals = [ "antidiagonal 45bot - 56bot", "antidiagonal 45top - 56top" ]
 strip_diagonal_cols = [ "45_220_fr", "45_210_fr", "56_210_fr", "56_220_fr" ]
 strip_diagonal_rows = [ "tp", "bt" ]
 
@@ -55,6 +57,13 @@ for plot in [ "rate - 2 RPs (220-fr)", "rate - 4 RPs" ]:
     rows.append(row)
   CTPPSTrackingStripLayoutDiag(dqmitems, plot, *rows)
 
+  rows = list()
+  for adiag in strip_antidiagonals:
+    row = list()
+    row.append("CTPPS/TrackingStrip/"+adiag+"/"+plot)
+    rows.append(row)
+  CTPPSTrackingStripLayoutAntiDiag(dqmitems, plot, *rows)
+
 # xy plots with conditions
 for cond in [ "2 RPs cond", "4 RPs cond" ]:
   rows = list()
@@ -62,13 +71,26 @@ for cond in [ "2 RPs cond", "4 RPs cond" ]:
     row = list()
     for unit in strip_diagonal_cols:
       arm=unit[:2]
-      if ((arm == "45") and (rp == "bt")): diag="diagonal 45bot - 56top"
-      if ((arm == "56") and (rp == "tp")): diag="diagonal 45bot - 56top"
-      if ((arm == "45") and (rp == "tp")): diag="diagonal 45top - 56bot"
-      if ((arm == "56") and (rp == "bt")): diag="diagonal 45top - 56bot"
+      if ((arm == "45") and (rp == "bt")): diag = "diagonal 45bot - 56top"
+      if ((arm == "56") and (rp == "tp")): diag = "diagonal 45bot - 56top"
+      if ((arm == "45") and (rp == "tp")): diag = "diagonal 45top - 56bot"
+      if ((arm == "56") and (rp == "bt")): diag = "diagonal 45top - 56bot"
       row.append("CTPPS/TrackingStrip/"+diag+"/xy hists/xy hist - "+unit+"_"+rp+" - "+cond)
     rows.append(row)
   CTPPSTrackingStripLayoutDiag(dqmitems, "XY profile - "+cond, *rows)
+
+  rows = list()
+  for rp in strip_diagonal_rows:
+    row = list()
+    for unit in strip_diagonal_cols:
+      arm=unit[:2]
+      if ((arm == "45") and (rp == "bt")): diag = "antidiagonal 45bot - 56bot"
+      if ((arm == "45") and (rp == "tp")): diag = "antidiagonal 45top - 56top"
+      if ((arm == "56") and (rp == "tp")): diag = "antidiagonal 45top - 56top"
+      if ((arm == "56") and (rp == "bt")): diag = "antidiagonal 45bot - 56bot"
+      row.append("CTPPS/TrackingStrip/"+diag+"/xy hists/xy hist - "+unit+"_"+rp+" - "+cond)
+    rows.append(row)
+  CTPPSTrackingStripLayoutAntiDiag(dqmitems, "XY profile - "+cond, *rows)
 
 
 
@@ -111,11 +133,74 @@ for station in diamond_stations:
   CTPPSTimingDiamondLayout(dqmitems, "clocks edges", *rows)
 
 
-  
+
+####################################################################################################
+# Totem Timing layouts
+####################################################################################################
+
+def TotemTimingLayout(i, p, *rows): i["CTPPS/TimingFastSilicon/Layouts/" + p] = DQMItem(layout=rows)
+totemTiming_stations = [ "sector 45/station 220/nr_tp", "sector 45/station 220/nr_bt", "sector 56/station 220/nr_tp", "sector 56/station 220/nr_bt" ]
+
+# layouts with no overlays
+TotTimingPlots = [   "activity per BX CMS",
+                     "active planes with time", \
+                     "amplitude", \
+                     "cell of max", \
+                     "hits in planes with time", \
+                     "hits in planes lumisection", \
+                     "mean amplitude", \
+                     "noise RMS", \
+                     "recHit time", \
+                     "tomography 220", \
+                     "tomography 210" ]
+TotTimingDrawOpt = [ {'ytype':"log"}, \
+                     {'ytype':"log"}, \
+                     {'withref':"no"}, \
+                     {'drawopts':"colztext"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colztext"}, \
+                     {'drawopts':"colztext"}, \
+                     {'withref':"no"}, \
+                     {'drawopts':"colz"}, \
+                     {'drawopts':"colz"} ]
+TotTimingDescription = [ \
+    "BX with activity in the detector: BX structure should be as CMS", \
+    "Planes (per event) with time information", \
+    "Amplitude of signals", \
+    "Index of the sample with maximum amplitude: should be around 20-22", \
+    "Hit map of channels with time information", \
+    "Hit map in the last lumisection: should be very similar to the cumulative map", \
+    "Mean amplitude of collected samples", \
+    "Noise RMS in the first samples (without signal)", \
+    "Time of arrival", \
+    "Coincidence with strip detectors", \
+    "Coincidence with strip detectors" ]
+
+for i in range(len(TotTimingPlots)):
+    rows = list()
+    for station in totemTiming_stations:
+      row = list()
+      path_str = "CTPPS/TimingFastSilicon/"+station+"/"+TotTimingPlots[i]
+      row.append( { "path" : path_str, "description" : TotTimingDescription[i], "draw":TotTimingDrawOpt[i] } )
+      rows.append(row)
+
+    TotemTimingLayout(dqmitems, TotTimingPlots[i], *rows)
+
+TotemTimingLayout(dqmitems, "sent digis percentage",
+          [{ "path" : "CTPPS/TimingFastSilicon/sent digis percentage", \
+         "description" : "Percentage of hits sent by DAQ", \
+         "draw": {"drawopts" : "colztext"} }])
+
+
+
+
+
+
+
 ####################################################################################################
 # Pixel layouts
 ####################################################################################################
-
 sectors = [ "sector 45", "sector 56" ]
 pixelstations = [ "station 210", "station 220" ]
 pixstationsf=["sector 45/station 210/","sector 45/station 220/","sector 56/station 210/","sector 56/station 220/"]
@@ -124,21 +209,21 @@ pix_planes2 = [ "3","4","5" ]
 
 def CTPPSTrackingPixelLayout(i, p, *rows): i["CTPPS/TrackingPixel/Layouts/" + p] = DQMItem(layout=rows)
 
-for plot in ["hit multiplicity in planes","hit average multiplicity in planes"]:
+for plot in ["hit multiplicity in planes"]:
   rows = list()
   row = list()
   for station in pixelstations:
-    row.append("CTPPS/TrackingPixel/sector 45/"+station+"/"+plot)
+    row.append("CTPPS/TrackingPixel/sector 45/"+station+"/fr_hr/"+plot)
   rows.append(row)
 
   row = list()
   for station in pixelstations:
-    row.append("CTPPS/TrackingPixel/sector 56/"+station+"/"+plot)
+    row.append("CTPPS/TrackingPixel/sector 56/"+station+"/fr_hr/"+plot)
   rows.append(row)
 
   CTPPSTrackingPixelLayout(dqmitems, plot, *rows)
 
-for plot in ["number of fired planes per event","number of fired aligned_ROCs per event","ROCs hits multiplicity per event"]:
+for plot in ["number of fired planes per event","ROCs hits multiplicity per event","track intercept point","number of tracks per event"]:
   rows = list()
   row = list()
   for station in pixelstations:
@@ -152,7 +237,7 @@ for plot in ["number of fired planes per event","number of fired aligned_ROCs pe
 
   CTPPSTrackingPixelLayout(dqmitems, plot, *rows)
 
-for plot in ["4 fired ROCs per BX"]:
+for plot in ["4 fired ROCs per BX", "5 fired planes per BX"]:
   rows = list()
   for station in pixstationsf:
     row = list()
@@ -160,16 +245,6 @@ for plot in ["4 fired ROCs per BX"]:
     rows.append(row)
 
   CTPPSTrackingPixelLayout(dqmitems, plot, *rows)
-
-for plot in ["5 fired planes per BX"]:
-  rows = list()
-  for station in pixstationsf:
-    row = list()
-    row.append("CTPPS/TrackingPixel/"+station+"fr_hr/"+plot)
-    rows.append(row)
-
-  CTPPSTrackingPixelLayout(dqmitems, plot, *rows)
-
 
 for sector in sectors:
   rows = list()
@@ -195,14 +270,14 @@ for plot in ["hits position"]:
       rows = list()
       row = list()
       for plane in pix_planes:
-        row.append("CTPPS/TrackingPixel/"+sector+"/"+station+"/fr_hr/plane_"+plane+"/"+plot)
+        hit_pos = "CTPPS/TrackingPixel/"+sector+"/"+station+"/fr_hr/plane_"+plane+"/"+plot
+        row.append( { "path": hit_pos, 'draw':{'ztype':"log"} } )
       rows.append(row)
 
       row = list()
       for plane in pix_planes2:
-        row.append("CTPPS/TrackingPixel/"+sector+"/"+station+"/fr_hr/plane_"+plane+"/"+plot)
+        hit_pos = "CTPPS/TrackingPixel/"+sector+"/"+station+"/fr_hr/plane_"+plane+"/"+plot
+        row.append( { "path": hit_pos, 'draw':{'ztype':"log"} } )
       rows.append(row)
 
       CTPPSTrackingPixelLayout(dqmitems, plot+":" +sector+" "+station+" fr_hr", *rows)
-
-
