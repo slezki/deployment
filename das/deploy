@@ -20,10 +20,12 @@ deploy_das_sw()
   case $host in
   vocms0126 | vocms0127)
     perl -p -i -e "s|prod/|dev/|g" $root/$cfgversion/config/$project/das2go-config.json
+    perl -p -i -e "s|cmsweb|cmsweb-dev|g" $root/$cfgversion/config/$project/das2go-config.json
     ;;
-  vocms0132 | vocms0731)
-    perl -p -i -e "s|prod/|int/|g" $root/$cfgversion/config/$project/das2go-config.json
-    ;;
+#  vocms0132 | vocms0731)
+#    perl -p -i -e "s|prod/|int/|g" $root/$cfgversion/config/$project/das2go-config.json
+#    perl -p -i -e "s|cmsweb|cmsweb-testbed|g" $root/$cfgversion/config/$project/das2go-config.json
+#    ;;
   *)
     ;;
   esac
@@ -31,7 +33,7 @@ deploy_das_sw()
 
 deploy_das_post()
 {
-  case $host in vocms013[689] | vocms073[89] | vocms016[135] | vocms0740) disable ;; * ) enable ;; esac
+  case $host in vocms013[689] | vocms073[89] | vocms016[135] | vocms0740 | vocms0766 ) disable ;; * ) enable ;; esac
   (mkcrontab
    sysboot
    for action in das_cleanup:'0 0-23/2 * * *'; do

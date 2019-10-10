@@ -16,7 +16,7 @@ DBS_INS = "@@DBS_INS@@"
 COUCH_URL = "%s/couchdb" % BASE_URL
 LOG_DB_URL = "%s/wmstats_logdb" % COUCH_URL
 LOG_REPORTER = "reqmgr2"
-AMQ_HOST_PORT = [('dashb-mb.cern.ch', 61113)]
+AMQ_HOST_PORT = [('cms-mb.cern.ch', 61313)]
 
 ROOTDIR = __file__.rsplit('/', 3)[0]
 # load AMQ credentials
@@ -28,6 +28,10 @@ config = Configuration()
 main = config.section_("main")
 srv = main.section_("server")
 srv.thread_pool = 30
+# The maximum number of requests which will be queued up before
+# the server refuses to accept it (default -1, meaning no limit).
+srv.accepted_queue_size = -1
+srv.accepted_queue_timeout = 0
 main.application = "reqmgr2"
 main.port = 8246 # main application port it listens on
 main.index = "ui"
@@ -37,8 +41,10 @@ main.authz_defaults = {"role": None, "group": None, "site": None}
 #set default logging (prevent duplicate)
 main.log_screen = True
 
-sec = main.section_("tools").section_("cms_auth")
-sec.key_file = "%s/auth/wmcore-auth/header-auth-key" % ROOTDIR
+tools = main.section_("tools")
+# provide CherryPy monitoring under: <hostname>/reqmgr2/data/stats
+tools.section_("cpstats").on = False
+tools.section_("cms_auth").key_file = "%s/auth/wmcore-auth/header-auth-key" % ROOTDIR
 
 # this is where the application will be mounted, where the REST API
 # is reachable and this features in CMS web frontend rewrite rules
@@ -80,11 +86,7 @@ data.tag_collector_url = "https://cmssdt.cern.ch/SDT/cgi-bin/ReleasesXML"
 # keys are not present at easy item but defined in a dedicated item ...)
 # https://cmssdt.cern.ch/tc/getReleasesInformation?release_state=Announced
 
-# request related settings (e.g. default injection arguments)
-data.default_sw_version = "CMSSW_5_2_5"
-data.default_sw_scramarch = "slc5_amd64_gcc434"
-data.dqm_url = "%s/dqm/dev" % BASE_URL
-#use dbs testbed for private vm test
+# used for the StepChainParentageFixTask; use dbs testbed for private vm test
 if DBS_INS == "private_vm":
     data.dbs_url = "https://cmsweb-testbed.cern.ch/dbs/int/global/DBSWriter"
 else:
@@ -121,7 +123,7 @@ ui_main.application = ui.index
 
 extentions = config.section_("extensions")
 # Production instance of wmdatamining, must be a production back-end
-if HOST.startswith("vocms0136") or HOST.startswith("vocms0132") or HOST.startswith("vocms0117") or HOST.startswith("vocms0127"):
+if HOST.startswith("vocms0766") or HOST.startswith("vocms0731") or HOST.startswith("vocms0117") or HOST.startswith("vocms0127"):
 #     wmdatamining = extentions.section_("wmdatamining")
 #     wmdatamining.object = "WMCore.ReqMgr.CherryPyThreads.WMDataMining.WMDataMining"
 #     wmdatamining.wmstats_url = "%s/%s" % (data.couch_host, data.couch_wmstats_db)
@@ -159,14 +161,14 @@ if HOST.startswith("vocms0136") or HOST.startswith("vocms0132") or HOST.startswi
     parentageFixTask.central_logdb_url = LOG_DB_URL
     parentageFixTask.log_reporter = LOG_REPORTER
 
-if HOST.startswith("vocms0161") or HOST.startswith("vocms0731") or HOST.startswith("vocms0117") or HOST.startswith("vocms0127"):
+if HOST.startswith("vocms0766") or HOST.startswith("vocms0731") or HOST.startswith("vocms0117") or HOST.startswith("vocms0127"):
     # status change task 
     statusChangeTasks = extentions.section_("statusChangeTasks")
     statusChangeTasks.object = "WMCore.ReqMgr.CherryPyThreads.StatusChangeTasks.StatusChangeTasks"
     statusChangeTasks.reqmgr2_url = "%s/reqmgr2" % BASE_URL
     statusChangeTasks.wmstats_url = "%s/wmstatsserver" % BASE_URL
     statusChangeTasks.workqueue_url = "%s/%s" % (data.couch_host, data.couch_workqueue_db)
-    statusChangeTasks.archiveDelayHours = 24 # delay the archive at least 24 hours after announced
+    statusChangeTasks.archiveDelayHours = 24 * 7 # delay the archive at least 7 days after announced
     statusChangeTasks.checkStatusDuration = 60 * 10  # every 10 min
     statusChangeTasks.log_file = '%s/logs/reqmgr2/statusChangeTasks-%s.log' % (__file__.rsplit('/', 4)[0], time.strftime("%Y%m%d"))
     statusChangeTasks.central_logdb_url = LOG_DB_URL
@@ -179,6 +181,7 @@ if HOST.startswith("vocms0161") or HOST.startswith("vocms0731") or HOST.startswi
     auxCacheUpdateTasks.tagCollectDuration = 60 * 60  # every 1 hour
     auxCacheUpdateTasks.tagcollect_url = "https://cmssdt.cern.ch/SDT/cgi-bin/ReleasesXML"
     auxCacheUpdateTasks.tagcollect_args = {"anytype": 1, "anyarch": 1}
+    auxCacheUpdateTasks.unified_url = "https://raw.githubusercontent.com/CMSCompOps/WmAgentScripts/master/unifiedConfiguration.json"
     auxCacheUpdateTasks.log_file = '%s/logs/reqmgr2/auxCacheUpdateTasks-%s.log' % (__file__.rsplit('/', 4)[0], time.strftime("%Y%m%d"))
     auxCacheUpdateTasks.central_logdb_url = LOG_DB_URL
     auxCacheUpdateTasks.log_reporter = LOG_REPORTER
@@ -193,7 +196,7 @@ if HOST.startswith("vocms0161") or HOST.startswith("vocms0731") or HOST.startswi
     heartbeatMonitor.central_logdb_url = LOG_DB_URL
     heartbeatMonitor.log_reporter = LOG_REPORTER
     # AMQ MonIT settings
-    if HOST.startswith("vocms0161") or HOST.startswith("vocms0731"):
+    if HOST.startswith("vocms0766") or HOST.startswith("vocms0731"):
         heartbeatMonitor.post_to_amq = True
     else:
         heartbeatMonitor.post_to_amq = False
